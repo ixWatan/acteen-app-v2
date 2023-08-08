@@ -41,7 +41,7 @@
     ·
     <a href="#">Report Bug</a>
     ·
-    <a href="[#](https://pintelzio.wixsite.com/acteen)">View Website</a>
+    <a href="https://pintelzio.wixsite.com/acteen">View Website</a>
   </p>
 </div>
 
