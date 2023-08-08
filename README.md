@@ -25,10 +25,8 @@
 <br />
 <div align="center">
   <a href="/">
-    <img src="
-    acteen-logo.jpg
-      " alt="Logo" width="250" height="200">
-  </a>
+    <img src="https://github.com/ixWatan/acteen-app-v2/assets/70540865/47ebfad8-9596-44b0-a6cc-b2ae7420491b" alt="Logo" width="250" height="200">
+
 
   <h3 align="center">Acteen</h3>
 
