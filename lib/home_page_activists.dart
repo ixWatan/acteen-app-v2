@@ -18,7 +18,7 @@ class HomePageActivists extends StatelessWidget {
       // ignore: use_build_context_synchronously
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => LoginPage()),
+        MaterialPageRoute(builder: (context) => const LoginPage()),
       );
     } catch (e) {
       // Handle sign-out errors here
