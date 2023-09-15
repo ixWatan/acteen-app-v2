@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'log_in_screen.dart';
+import 'create_event_page.dart';
 
 // ignore: depend_on_referenced_packages
 import 'package:firebase_auth/firebase_auth.dart';
@@ -37,12 +38,10 @@ class HomePageOrganizations extends StatelessWidget {
 
 
   @override
-  Widget build(BuildContext context) {//The build method is overridden to define the widget tree that this widget will render.
-    return Scaffold(//It returns a Scaffold widget, which is a top-level container for a Material Design visual structure.
-      appBar: AppBar(//Inside the Scaffold, an AppBar widget is defined with a title displaying "Home Page".
-        //The AppBar also contains an array of actions, which currently includes a single IconButton with a logout icon.
-        //When this button is pressed, the _signOut method is called to sign out the user.
-        automaticallyImplyLeading: false, //defuse the back button in the app bar
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text('Home Page Organizations'),
         actions: [
           IconButton(
@@ -51,9 +50,27 @@ class HomePageOrganizations extends StatelessWidget {
           ),
         ],
       ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) =>  const CreateEventPage()),
+                );
+              },
+              child:  const Text('Go to Login'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
+
 
 
 

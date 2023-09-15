@@ -27,12 +27,15 @@ class _SignUpPageState extends State<SignUpPageActivists> {
   //It defines three instance variables: _auth (an instance of FirebaseAuth),
   //_emailController, and _passwordController (both are instances of TextEditingController to control the text fields for email and password inputs).
 
-  Future<void> _signUp() async {
+  Future<void> _signUp() async { //This declares an asynchronous method named _login that returns a Future<void>. The async keyword indicates that the method contains asynchronous operations.
     try {
       UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
+      //Inside a try block, the method attempts to log in a user using Firebase Authentication.
+      //It calls the signInWithEmailAndPassword method of the _auth object (which is an instance of FirebaseAuth).
+      //The email and password for the login are retrieved from the _emailController and _passwordController text controllers, respectively.
 
       // Add user details to Firestore
       CollectionReference users = FirebaseFirestore.instance.collection('organizations');
@@ -46,6 +49,9 @@ class _SignUpPageState extends State<SignUpPageActivists> {
         context,
         MaterialPageRoute(builder: (context) => const HomePageOrganizations()),
       );
+      //If the login attempt is successful, the method navigates the user to the HomePageOrganizations screen.
+      //This is done using the Navigator.push method, which pushes a new route (in this case, HomePageOrganizations) onto the navigation stack.
+
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -54,6 +60,9 @@ class _SignUpPageState extends State<SignUpPageActivists> {
         ),
       );
     }
+    //If there's an error during the login attempt, it's caught by the catch block.
+    //Specifically, it catches errors of type FirebaseAuthException. When such an error occurs, a SnackBar is displayed to the user with the error message.
+    //If the exception doesn't provide a specific message, the default message 'An error occurred' is shown.
   }
 
   @override
