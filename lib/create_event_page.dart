@@ -145,11 +145,26 @@ class _CreateEventPageState extends State<CreateEventPage> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
-
           children: [
             TextField(
               controller: _titleController,
-              decoration: const InputDecoration(labelText: 'Title'),
+              decoration: InputDecoration(
+                labelText: 'Title',
+                suffixIcon: Row(
+                  mainAxisSize: MainAxisSize.min, // this will take the minimum space that is needed
+                  children: <Widget>[
+                    IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        _titleController.clear();
+                        setState(() {
+                          _titleController.clear();
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
             ),
             const SizedBox(height: 10),
             ElevatedButton(
@@ -157,26 +172,90 @@ class _CreateEventPageState extends State<CreateEventPage> {
               child: const Text('Select Image'),
             ),
             if (_selectedImage != null)
-              Image.file(
-                File(_selectedImage!.path),
-                height: 200,
-                width: 200,
+              Container(
+                height: 300,
+                width: 300,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                ),
+                child: Stack(
+                  children: [
+                    Center(
+                      child: Image.file(
+                        File(_selectedImage!.path),
+                        height: 300,
+                        width: 300,
+                        fit: BoxFit.cover,  // This will make the image fill the container
+                      ),
+                    ),
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: IconButton(
+                        icon: const Icon(
+                          Icons.clear,
+                          color: Colors.red,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _selectedImage = null;
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ),
+
+
             const SizedBox(height: 10),
             TextField(
               controller: _descriptionController,
-              decoration: const InputDecoration(labelText: 'Description'),
+              decoration: InputDecoration(
+                labelText: 'Description',
+                suffixIcon: Row(
+                  mainAxisSize: MainAxisSize.min, // this will take the minimum space that is needed
+                  children: <Widget>[
+                    IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        _descriptionController.clear();
+                        setState(() {
+                          _descriptionController.clear();
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
             ),
             const SizedBox(height: 10),
             TextField(
               controller: _locationController,
-              decoration: const InputDecoration(labelText: 'Location'),
+              decoration: InputDecoration(
+                labelText: 'Location',
+                suffixIcon: Row(
+                  mainAxisSize: MainAxisSize.min, // this will take the minimum space that is needed
+                  children: <Widget>[
+                    IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        _locationController.clear();
+                        // You might also want to clear the location suggestions here
+                        setState(() {
+                          _locationSuggestions.clear();
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
               onChanged: (value) {
                 // Update location suggestions when the user types
                 _getPlaceSuggestions(value);
-
               },
             ),
+
             // Display location suggestions as a dropdown menu
             if (_locationSuggestions.isNotEmpty)
               Container(
@@ -200,29 +279,61 @@ class _CreateEventPageState extends State<CreateEventPage> {
                 ),
               ),
             const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () => _selectDate(context, true),
-              child: const Text('Select Start Date'),
+
+            // Start Date Picker
+            TextField(
+              readOnly: true,
+              controller: TextEditingController(text: _startDate != null ? _startDate!.toLocal().toString() : ''),
+              decoration: InputDecoration(
+                labelText: 'Select Start Date',
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.calendar_today),
+                  onPressed: () => _selectDate(context, true),
+                ),
+              ),
             ),
-            if (_startDate != null) Text('Selected date: ${_startDate!.toLocal()}'),
             const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () => _selectTime(context, true),
-              child: const Text('Select Start Time'),
+
+            // Start Time Picker
+            TextField(
+              readOnly: true,
+              controller: TextEditingController(text: _startTime != null ? _startTime!.format(context) : ''),
+              decoration: InputDecoration(
+                labelText: 'Select Start Time',
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.access_time),
+                  onPressed: () => _selectTime(context, true),
+                ),
+              ),
             ),
-            if (_startTime != null) Text('Selected time: ${_startTime!.format(context)}'),
             const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () => _selectDate(context, false),
-              child: const Text('Select End Date'),
+
+            // End Date Picker
+            TextField(
+              readOnly: true,
+              controller: TextEditingController(text: _endDate != null ? _endDate!.toLocal().toString() : ''),
+              decoration: InputDecoration(
+                labelText: 'Select End Date',
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.calendar_today),
+                  onPressed: () => _selectDate(context, false),
+                ),
+              ),
             ),
-            if (_endDate != null) Text('Selected date: ${_endDate!.toLocal()}'),
             const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () => _selectTime(context, false),
-              child: const Text('Select End Time'),
+
+            // End Time Picker
+            TextField(
+              readOnly: true,
+              controller: TextEditingController(text: _endTime != null ? _endTime!.format(context) : ''),
+              decoration: InputDecoration(
+                labelText: 'Select End Time',
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.access_time),
+                  onPressed: () => _selectTime(context, false),
+                ),
+              ),
             ),
-            if (_endTime != null) Text('Selected time: ${_endTime!.format(context)}'),
           ],
         ),
       ),
