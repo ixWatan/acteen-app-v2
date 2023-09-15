@@ -1,11 +1,10 @@
 // ignore_for_file: depend_on_referenced_packages
-
-import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:flutter_google_places/flutter_google_places.dart';
-import 'package:google_maps_webservice/places.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'config.dart';
 
@@ -21,10 +20,12 @@ class CreateEventPage extends StatefulWidget {
 
 
 class _CreateEventPageState extends State<CreateEventPage> {
+  final TextEditingController _locationController = TextEditingController();
+  LatLng? _selectedLocation;
+  List<String> _locationSuggestions = [];
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   XFile? _selectedImage;
-  LatLng? _selectedLocation;
   DateTime? _startDate;
   TimeOfDay? _startTime;
   DateTime? _endDate;
@@ -39,35 +40,6 @@ class _CreateEventPageState extends State<CreateEventPage> {
     });
   }
 
-  Future<void> _selectLocation() async {
-    String apiKey = getApiKey(context);
-    GoogleMapsPlaces places = GoogleMapsPlaces(apiKey: apiKey);
-    try {
-      Prediction? p = await PlacesAutocomplete.show(
-        context: context,
-        apiKey: apiKey,
-        mode: Mode.overlay, // or Mode.fullscreen
-        language: "en",
-        components: [Component(Component.country, "us")],
-      );
-
-      if (p != null) {
-        PlacesDetailsResponse detail = await places.getDetailsByPlaceId(p.placeId!);
-        double lat = detail.result.geometry!.location.lat;
-        double lng = detail.result.geometry!.location.lng;
-        setState(() {
-          _selectedLocation = LatLng(lat, lng);
-        });
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
 
 
   Future<void> _selectDate(BuildContext context, bool isStart) async {
@@ -130,6 +102,40 @@ class _CreateEventPageState extends State<CreateEventPage> {
     }
   }
 
+
+ /* Future<void> _selectLocation() async {
+    try {
+      final apiKey = getApiKey(context);
+      final places = GoogleMapsPlaces(apiKey: apiKey);
+
+      final Prediction? p = await PlacesAutocomplete.show(
+        context: context,
+        apiKey: apiKey,
+        mode: Mode.overlay,
+        language: "en",
+        components: [Component(Component.country, "us")],
+      );
+
+      if (p != null) {
+        PlacesDetailsResponse detail = await places.getDetailsByPlaceId(p.placeId!);
+        double lat = detail.result.geometry!.location.lat;
+        double lng = detail.result.geometry!.location.lng;
+        setState(() {
+          _selectedLocation = LatLng(lat, lng);
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }*/
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -162,12 +168,37 @@ class _CreateEventPageState extends State<CreateEventPage> {
               decoration: const InputDecoration(labelText: 'Description'),
             ),
             const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () => _selectLocation(),
-              child: const Text('Select Location'),
+            TextField(
+              controller: _locationController,
+              decoration: const InputDecoration(labelText: 'Location'),
+              onChanged: (value) {
+                // Update location suggestions when the user types
+                _getPlaceSuggestions(value);
+
+              },
             ),
-            if (_selectedLocation != null)
-              Text('Selected location: ${_selectedLocation!.latitude}, ${_selectedLocation!.longitude}'),
+            // Display location suggestions as a dropdown menu
+            if (_locationSuggestions.isNotEmpty)
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(4.0),
+                ),
+                child: Column(
+                  children: _locationSuggestions.map((location) {
+                    return ListTile(
+                      title: Text(location),
+                      onTap: () {
+                        // Set the selected location when the user taps a suggestion
+                        setState(() {
+                          _locationController.text = location;
+                          _locationSuggestions.clear(); // Clear suggestions
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
+              ),
             const SizedBox(height: 10),
             ElevatedButton(
               onPressed: () => _selectDate(context, true),
@@ -197,4 +228,44 @@ class _CreateEventPageState extends State<CreateEventPage> {
       ),
     );
   }
+
+
+  // Fetch location suggestions from the Google Places Autocomplete API
+  void _getPlaceSuggestions(String input) async {
+    try {
+      final String apiKey = getApiKey(context);
+      final endpoint = Uri.https('maps.googleapis.com', '/maps/api/place/autocomplete/json', {
+        'input': input,
+        'key': apiKey,
+      });
+
+      final response = await http.get(endpoint);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['predictions'] != null) {
+          final List<String> suggestions = List<String>.from(data['predictions'].map((prediction) => prediction['description']));
+          setState(() {
+            _locationSuggestions = suggestions;
+          });
+        }
+      } else {
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error fetching data: ${response.statusCode}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('An error occurred: $error'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
 }
