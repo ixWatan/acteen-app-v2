@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:test/home_page_activists.dart';
 // ignore: depend_on_referenced_packages
@@ -27,30 +29,27 @@ class _SignUpPageState extends State<SignUpPageOrganizations> {
   //It defines three instance variables: _auth (an instance of FirebaseAuth),
   //_emailController, and _passwordController (both are instances of TextEditingController to control the text fields for email and password inputs).
 
-  Future<void> _signUp() async { //This declares an asynchronous method named _login that returns a Future<void>. The async keyword indicates that the method contains asynchronous operations.
+  Future<void> _signUp() async {
     try {
       UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      //Inside a try block, the method attempts to log in a user using Firebase Authentication.
-      //It calls the signInWithEmailAndPassword method of the _auth object (which is an instance of FirebaseAuth).
-      //The email and password for the login are retrieved from the _emailController and _passwordController text controllers, respectively.
+
+      String userId = userCredential.user!.uid;
 
       // Add user details to Firestore
       CollectionReference users = FirebaseFirestore.instance.collection('activists');
-      users.add({
+      users.doc(userId).set({
+        'uid': userId,
         'email': _emailController.text.trim(),
         // add other details here
       });
 
-      // ignore: use_build_context_synchronously
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const HomePageActivists()),
       );
-      //If the login attempt is successful, the method navigates the user to the HomePageOrganizations screen.
-      //This is done using the Navigator.push method, which pushes a new route (in this case, HomePageOrganizations) onto the navigation stack.
 
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -59,11 +58,16 @@ class _SignUpPageState extends State<SignUpPageOrganizations> {
           backgroundColor: Colors.red,
         ),
       );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('An unexpected error occurred'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
-    //If there's an error during the login attempt, it's caught by the catch block.
-    //Specifically, it catches errors of type FirebaseAuthException. When such an error occurs, a SnackBar is displayed to the user with the error message.
-    //If the exception doesn't provide a specific message, the default message 'An error occurred' is shown.
   }
+
 
 
   @override

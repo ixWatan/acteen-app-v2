@@ -1,9 +1,12 @@
+// ignore_for_file: use_build_context_synchronously
 import 'package:flutter/material.dart';
 // ignore: depend_on_referenced_packages
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:test/sign_up_organizations_screen.dart';
 import 'home_page_organizations.dart';
+import 'home_page_activists.dart';
 import 'sign_up_activists_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() {
   runApp(const MyApp());
@@ -48,22 +51,39 @@ class _LoginPageState extends State<LoginPage> {
   //_emailController, and _passwordController (both are instances of TextEditingController to control the text fields for email and password inputs).
 
   Future<void> _login() async {
-    //_login is an asynchronous method that attempts to log in a user using Firebase Authentication.
-
     try {
       await _auth.signInWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      //It uses the signInWithEmailAndPassword method of the _auth object to authenticate a user with the email and password provided.
 
-      // ignore: use_build_context_synchronously
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const HomePageOrganizations()),
-      );
-      //If the authentication is successful, it navigates to the HomePage.
+      final userId = FirebaseAuth.instance.currentUser?.uid;
 
+      if (userId != null) {
+        DocumentSnapshot activistData = await FirebaseFirestore.instance.collection('activists').doc(userId).get();
+        DocumentSnapshot organizationData = await FirebaseFirestore.instance.collection('organizations').doc(userId).get();
+
+        if (activistData.exists) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const HomePageActivists()),
+          );
+        } else if (organizationData.exists) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const HomePageOrganizations()),
+          );
+        } else {
+          // Handle case where user doesn't exist in either collection
+          // Maybe show a snackbar with an error message
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('User not found in either collection'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

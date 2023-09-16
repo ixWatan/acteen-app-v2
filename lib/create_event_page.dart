@@ -1,12 +1,13 @@
-// ignore_for_file: depend_on_referenced_packages
+// ignore_for_file: depend_on_referenced_packages, use_build_context_synchronously, duplicate_ignore
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'config.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class CreateEventPage extends StatefulWidget {
   const CreateEventPage({super.key});
@@ -17,11 +18,11 @@ class CreateEventPage extends StatefulWidget {
 }
 
 
+String? selectedLocation;
 
 
 class _CreateEventPageState extends State<CreateEventPage> {
   final TextEditingController _locationController = TextEditingController();
-  LatLng? _selectedLocation;
   List<String> _locationSuggestions = [];
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
@@ -78,20 +79,36 @@ class _CreateEventPageState extends State<CreateEventPage> {
 
   Future<void> addEventToDatabase() async {
     try {
-      await FirebaseFirestore.instance.collection('events').add({
-        'title': _titleController.text,
-        'description': _descriptionController.text,
-        'imagePath': _selectedImage?.path, // You might want to upload the image to a server and store the URL instead
-        'location': {
-          'latitude': _selectedLocation?.latitude,
-          'longitude': _selectedLocation?.longitude,
-        },
-        'startDate': _startDate?.toIso8601String(),
-        'startTime': _startTime?.format(context),
-        'endDate': _endDate?.toIso8601String(),
-        'endTime': _endTime?.format(context),
-        'userId': 'logged_in_user_id', // Replace with the actual user ID
-      });
+      String? imageUrl;
+      if (_selectedImage != null) {
+        final ref = FirebaseStorage.instance
+            .ref()
+            .child('images')
+            .child('${DateTime.now().toIso8601String()}.png');
+
+        await ref.putFile(File(_selectedImage!.path));
+        imageUrl = await ref.getDownloadURL(); // Get the URL of the uploaded image
+      }
+
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+
+      if (userId != null) {
+        await FirebaseFirestore.instance
+            .collection('organizations')
+            .doc(userId)
+            .collection('events')
+            .add({
+          'title': _titleController.text,
+          'description': _descriptionController.text,
+          'imagePath': imageUrl, // Now storing the URL of the uploaded image instead of the local path
+          'location': selectedLocation,
+          'startDate': _startDate?.toIso8601String(),
+          'startTime': _startTime?.format(context),
+          'endDate': _endDate?.toIso8601String(),
+          'endTime': _endTime?.format(context),
+          'userId': userId, // Now getting the actual user ID
+        });
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -103,37 +120,44 @@ class _CreateEventPageState extends State<CreateEventPage> {
   }
 
 
- /* Future<void> _selectLocation() async {
+
+
+  // Fetch location suggestions from the Google Places Autocomplete API
+  void _getPlaceSuggestions(String input) async {
     try {
-      final apiKey = getApiKey(context);
-      final places = GoogleMapsPlaces(apiKey: apiKey);
+      final String apiKey = getApiKey(context);
+      final endpoint = Uri.https('maps.googleapis.com', '/maps/api/place/autocomplete/json', {
+        'input': input,
+        'key': apiKey,
+      });
 
-      final Prediction? p = await PlacesAutocomplete.show(
-        context: context,
-        apiKey: apiKey,
-        mode: Mode.overlay,
-        language: "en",
-        components: [Component(Component.country, "us")],
-      );
+      final response = await http.get(endpoint);
 
-      if (p != null) {
-        PlacesDetailsResponse detail = await places.getDetailsByPlaceId(p.placeId!);
-        double lat = detail.result.geometry!.location.lat;
-        double lng = detail.result.geometry!.location.lng;
-        setState(() {
-          _selectedLocation = LatLng(lat, lng);
-        });
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['predictions'] != null) {
+          final List<String> suggestions = List<String>.from(data['predictions'].map((prediction) => prediction['description']));
+          setState(() {
+            _locationSuggestions = suggestions;
+          });
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error fetching data: ${response.statusCode}'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
-    } catch (e) {
+    } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(e.toString()),
+          content: Text('An error occurred: $error'),
           backgroundColor: Colors.red,
         ),
       );
     }
-  }*/
-
+  }
 
 
   @override
@@ -268,12 +292,13 @@ class _CreateEventPageState extends State<CreateEventPage> {
                     return ListTile(
                       title: Text(location),
                       onTap: () {
-                        // Set the selected location when the user taps a suggestion
                         setState(() {
                           _locationController.text = location;
+                          selectedLocation = location;
                           _locationSuggestions.clear(); // Clear suggestions
                         });
                       },
+
                     );
                   }).toList(),
                 ),
@@ -334,49 +359,15 @@ class _CreateEventPageState extends State<CreateEventPage> {
                 ),
               ),
             ),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: addEventToDatabase,
+              child: const Text('Upload'),
+            ),
           ],
         ),
       ),
     );
-  }
-
-
-  // Fetch location suggestions from the Google Places Autocomplete API
-  void _getPlaceSuggestions(String input) async {
-    try {
-      final String apiKey = getApiKey(context);
-      final endpoint = Uri.https('maps.googleapis.com', '/maps/api/place/autocomplete/json', {
-        'input': input,
-        'key': apiKey,
-      });
-
-      final response = await http.get(endpoint);
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (data['predictions'] != null) {
-          final List<String> suggestions = List<String>.from(data['predictions'].map((prediction) => prediction['description']));
-          setState(() {
-            _locationSuggestions = suggestions;
-          });
-        }
-      } else {
-        // ignore: use_build_context_synchronously
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error fetching data: ${response.statusCode}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('An error occurred: $error'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
   }
 
 }

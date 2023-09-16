@@ -62,7 +62,7 @@ class HomePageOrganizations extends StatelessWidget {
                   MaterialPageRoute(builder: (context) =>  const CreateEventPage()),
                 );
               },
-              child:  const Text('Go to Login'),
+              child:  const Text('Create New Post'),
             ),
           ],
         ),

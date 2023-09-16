@@ -52,7 +52,8 @@ class MyApp extends StatelessWidget {
     // The build method is called by the framework to generate the widget tree.
 
     return const MaterialApp(
-      home: RootPage(),
+      home: LoginPage()
+      //RootPage(),
     );
     //The home property of MaterialApp is set to an instance of RootPage widget, which means RootPage will be the first screen displayed when the app launches.
     //The RootPage widget would be where you define the behavior for checking the authentication state and navigating to the appropriate page (like a login or home page).
@@ -119,7 +120,7 @@ class _MyHomePageState extends State<MyHomePage> {
 // Depending on the current authentication state, it either shows a loading spinner, the home page, or the login page.
 // This allows the app to dynamically show the appropriate page based on the user's authentication state, even reacting to changes in real-time (e.g., if the user logs in or out).
 
-//RootPage
+/*//RootPage
 class RootPage extends StatelessWidget {
   //This line defines a new class named RootPage that extends StatelessWidget.
   // A StatelessWidget is a widget that does not have any mutable state, meaning its properties are immutable once set.
@@ -168,7 +169,7 @@ class RootPage extends StatelessWidget {
       },
     );
   }
-}
+}*/
 
 //--------------------------------------------------------------------------------
 
