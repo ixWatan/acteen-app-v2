@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "145701483873",
+    "project_id": "acteen--flutter-app",
+    "storage_bucket": "acteen--flutter-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:145701483873:android:c4b41f25d12ffdb96b4120",
+        "android_client_info": {
+          "package_name": "com.example.test"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "145701483873-h261dracncd4f5ht79qni59vci3lvqrf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDwK9zO3-X2KfP_Hnisk8ZCGnfwh28ZVQ8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "145701483873-h261dracncd4f5ht79qni59vci3lvqrf.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "145701483873-p79rtm8j4mrbmulrr204bn4m0tm4mv9n.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.test.RunnerTests"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
