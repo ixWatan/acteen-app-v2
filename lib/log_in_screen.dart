@@ -50,18 +50,22 @@ class _LoginPageState extends State<LoginPage> {
   //It defines three instance variables: _auth (an instance of FirebaseAuth),
   //_emailController, and _passwordController (both are instances of TextEditingController to control the text fields for email and password inputs).
 
-  Future<void> _login() async {
-    try {
+  Future<void> _login() async {//This declares a method named _login that is asynchronous (meaning it can perform operations that might take some time to complete) and returns a Future that resolves to void (i.e., it doesn't return a value).
+    try {//A try block is initiated. The code inside this block is executed, and if any error occurs, it jumps to the catch blocks to handle the error.
       await _auth.signInWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
+      //A call is made to the signInWithEmailAndPassword method of the _auth object to sign in the user with the email and password retrieved from the respective text controllers.
+      //The await keyword is used to wait for this operation to complete before moving to the next line.
 
       final userId = FirebaseAuth.instance.currentUser?.uid;
+      //final userId = FirebaseAuth.instance.currentUser?.uid;
 
-      if (userId != null) {
+      if (userId != null) {//If userId is not null (meaning a user is logged in), the following code inside this block is executed.
         DocumentSnapshot activistData = await FirebaseFirestore.instance.collection('activists').doc(userId).get();
         DocumentSnapshot organizationData = await FirebaseFirestore.instance.collection('organizations').doc(userId).get();
+        //You're fetching the document data from both the 'activists' and 'organizations' collections in Firestore where the document ID matches the current user's ID.
 
         if (activistData.exists) {
           Navigator.push(
@@ -74,6 +78,8 @@ class _LoginPageState extends State<LoginPage> {
             MaterialPageRoute(builder: (context) => const HomePageOrganizations()),
           );
         } else {
+          //Based on the retrieved data, you're checking if the user exists in the 'activists' collection or the 'organizations' collection, and navigating to the respective home page accordingly.
+          //If the user does not exist in either collection, the code inside the following block will be executed.
           // Handle case where user doesn't exist in either collection
           // Maybe show a snackbar with an error message
           ScaffoldMessenger.of(context).showSnackBar(
@@ -82,7 +88,7 @@ class _LoginPageState extends State<LoginPage> {
               backgroundColor: Colors.red,
             ),
           );
-        }
+        }//If the user doesn't exist in either collection, a snackbar is displayed with an error message indicating that the user was not found in either collection.
       }
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -92,7 +98,8 @@ class _LoginPageState extends State<LoginPage> {
         ),
       );
     }
-    //If an error occurs (caught by FirebaseAuthException), it displays a SnackBar with the error message.
+    //If any error occurs during the execution of the code inside the try block, this catch block will handle it.
+    //It catches errors of type FirebaseAuthException and displays a snackbar with the respective error message.
   }
 
   @override
@@ -155,7 +162,8 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );    //It returns a Scaffold widget with an AppBar titled "Login Page" and a body that contains a column of widgets including text fields for email and password inputs, and buttons for the login process and navigating to the sign-up page.
   }
-}
+}//This marks the end of the _login method.
+
 
 
 

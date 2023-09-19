@@ -30,13 +30,19 @@ class _SignUpPageState extends State<SignUpPageOrganizations> {
   //_emailController, and _passwordController (both are instances of TextEditingController to control the text fields for email and password inputs).
 
   Future<void> _signUp() async {
-    try {
+    //You're declaring a method named _signUp that is asynchronous (meaning it can perform operations that might take some time to complete,
+    //like network requests) and returns a Future that resolves to void (i.e., it doesn't return a value).
+
+    try {//A try block is initiated. The code inside this block is executed, and if any error occurs, it jumps to the catch blocks to handle the error.
       UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
+      //A call is made to the createUserWithEmailAndPassword method of the _auth object (an instance of FirebaseAuth).
+      //This method attempts to create a new user with the email and password retrieved from the respective text controllers. The await keyword is used to wait for this operation to complete before moving to the next line. The result (a UserCredential object) is stored in the variable userCredential.
 
       String userId = userCredential.user!.uid;
+      //You're retrieving the unique ID (uid) of the newly created user from the userCredential object and storing it in the userId variable.
 
       // Add user details to Firestore
       CollectionReference users = FirebaseFirestore.instance.collection('activists');
@@ -45,11 +51,13 @@ class _SignUpPageState extends State<SignUpPageOrganizations> {
         'email': _emailController.text.trim(),
         // add other details here
       });
+      //You're setting up a reference to the 'activists' collection in Firestore and using the set method to create a new document with the user's ID as the document ID, and setting the fields uid and email in that document.
 
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const HomePageActivists()),
       );
+      //After successfully creating the user and saving the details to Firestore, you're navigating to the HomePageActivists screen using Navigator.push.
 
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -66,6 +74,8 @@ class _SignUpPageState extends State<SignUpPageOrganizations> {
         ),
       );
     }
+    //If any error occurs during the execution of the code inside the try block, these catch blocks will handle them.
+    //The first catch block handles errors of type FirebaseAuthException, displaying a snackbar with the error message. The second catch block handles any other types of errors, displaying a snackbar with a generic error message.
   }
 
 
@@ -123,7 +133,8 @@ class _SignUpPageState extends State<SignUpPageOrganizations> {
       ),
     );
   }
-}
+}//This marks the end of the _signUp method.
+
 
 
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-
 // ignore: depend_on_referenced_packages
 import 'package:firebase_auth/firebase_auth.dart';
+import 'feed_page.dart';
 import 'log_in_screen.dart';
 
 class HomePageActivists extends StatelessWidget {
@@ -35,6 +35,8 @@ class HomePageActivists extends StatelessWidget {
   //If an error occurs, it can be handled in the catch block (currently, errors are not handled).
 
 
+
+
   @override
   Widget build(BuildContext context) {//The build method is overridden to define the widget tree that this widget will render.
     return Scaffold(//It returns a Scaffold widget, which is a top-level container for a Material Design visual structure.
@@ -48,6 +50,20 @@ class HomePageActivists extends StatelessWidget {
             icon: const Icon(Icons.logout),
             onPressed: () => _signOut(context),
           ),
+        ],
+      ),
+      body: Column(
+        children: [
+          const Text('Home-Page Activists'),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => FeedPage()),
+              );
+            },
+            child:  const Text('Feed'),
+          )
         ],
       ),
     );
