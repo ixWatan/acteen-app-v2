@@ -1,7 +1,7 @@
 // ignore_for_file: depend_on_referenced_packages
 
 import 'package:flutter/material.dart';
-import 'package:test/post.dart';
+import 'package:test/Posts%20Peocess/post.dart';
 import 'package:add_2_calendar/add_2_calendar.dart';
 
 class PostDetailPage extends StatelessWidget {
@@ -61,6 +61,7 @@ class PostDetailPage extends StatelessWidget {
                   Text('Location: ${post.selectedLocation}'),
                 if (post.startDate != null)
                   Text('Start Date: ${post.startDate!.toLocal().toString().split(' ')[0]}'),
+
                 if (post.startTime != null)
                   Text('Start Time: ${post.startTime!.format(context)}'),
                 if (post.endDate != null)

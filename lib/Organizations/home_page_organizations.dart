@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'log_in_screen.dart';
+import '../log_in_screen.dart';
 import 'create_event_page.dart';
 
 // ignore: depend_on_referenced_packages

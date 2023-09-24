@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 // ignore: depend_on_referenced_packages
 import 'package:firebase_auth/firebase_auth.dart';
 import 'feed_page.dart';
-import 'log_in_screen.dart';
+import '../log_in_screen.dart';
 
 class HomePageActivists extends StatelessWidget {
   //HomePage is a class that extends StatelessWidget, indicating that this widget does not have a mutable state.
@@ -59,7 +59,7 @@ class HomePageActivists extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => FeedPage()),
+                MaterialPageRoute(builder: (context) => const FeedPage()),
               );
             },
             child:  const Text('Feed'),
