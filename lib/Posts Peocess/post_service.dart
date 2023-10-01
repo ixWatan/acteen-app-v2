@@ -1,3 +1,4 @@
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'filter_c.dart';
@@ -75,14 +76,20 @@ class PostService {
         DateTime filterDate = value; // Assuming value is a DateTime object
         posts = posts.where((post) =>
         post.startDate != null &&
-            DateTime(post.startDate!.year, post.startDate!.month, post.startDate!.day).isBefore(
-                DateTime(filterDate.year, filterDate.month, filterDate.day)
+            (
+                DateTime(post.startDate!.year, post.startDate!.month, post.startDate!.day).isBefore(
+                    DateTime(filterDate.year, filterDate.month, filterDate.day)
+                ) ||
+                    DateTime(post.startDate!.year, post.startDate!.month, post.startDate!.day).isAtSameMomentAs(
+                        DateTime(filterDate.year, filterDate.month, filterDate.day)
+                    )
             )
         ).toList();
       }
 
 
-     /* if (key == 'startDate') {
+
+      /* if (key == 'startDate') {
         DateTime filterDate = value; // Assuming value is a DateTime object
         posts = posts.where((post) =>
         post.startDate != null &&
@@ -91,8 +98,6 @@ class PostService {
             post.startDate!.day == filterDate.day
         ).toList();
       }*/
-
-
 
 
       if (key == 'startTime') {

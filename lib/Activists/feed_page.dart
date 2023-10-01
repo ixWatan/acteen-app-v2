@@ -1,9 +1,9 @@
 // ignore_for_file: depend_on_referenced_packages, library_private_types_in_public_api
 import 'package:flutter/material.dart';
-import 'package:test/post_detail_page.dart';
-import 'filter_c.dart';
-import 'post.dart';
-import 'post_service.dart';
+import 'package:test/Posts%20Peocess/post_detail_page.dart';
+import '../Posts Peocess/filter_c.dart';
+import '../Posts Peocess/post.dart';
+import '../Posts Peocess/post_service.dart';
 
 class FeedPage extends StatefulWidget {
   const FeedPage({Key? key}) : super(key: key);
@@ -110,13 +110,27 @@ class _FilterBarState extends State<FilterBar> {
               onPressed: _showTimeFilterDialog,
               child: const Text('Time'),
             ),
+            ElevatedButton(
+              onPressed: _showDateFilterDialog,
+              child: const Text('Date'),
+            ),
           ],
         ),
         Wrap(
           spacing: 6.0,
           children: widget.currentFilter.tags.map((tag) {
+            String label;
+            dynamic value = tag.values.first;
+            if (value is DateTime) {
+              label = value.toLocal().toIso8601String().split("T")[0]; // Keep only the date part
+            } else if (value is TimeOfDay) {
+              label = value.format(context); // Format TimeOfDay
+            } else {
+              label = value.toString();
+            }
+
             return Chip(
-              label: Text(tag.values.first.toString()),
+              label: Text(label),
               deleteIcon: const Icon(Icons.close),
               onDeleted: () {
                 setState(() {
@@ -126,7 +140,8 @@ class _FilterBarState extends State<FilterBar> {
               },
             );
           }).toList(),
-        ),
+        )
+
       ],
     );
 
@@ -212,8 +227,45 @@ class _FilterBarState extends State<FilterBar> {
   }
 
 
+  void _showDateFilterDialog() {
+    showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    ).then((date) {
+      if (date != null) {
+        setState(() {
+          widget.currentFilter.startDate = date;
+
+          // Adding tags for the selected date
+          widget.currentFilter.addTag('startDate', date);
+
+        });
+        widget.onFilterChanged(widget.currentFilter); // Pass the updated currentFilter instance to the callback
+      }
+    });
+  }
 
   void _showTimeFilterDialog() {
+    showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    ).then((time) {
+      if (time != null) {
+        setState(() {
+          widget.currentFilter.startTime = time;
+
+          // Adding tags for the selected time
+          widget.currentFilter.addTag('startTime', time); // <-- store TimeOfDay object
+        });
+        widget.onFilterChanged(widget.currentFilter); // Pass the updated currentFilter instance to the callback
+      }
+    });
+  }
+
+
+/*  void _showTimeFilterDialog() {
 
     showDatePicker(
       context: context,
@@ -240,7 +292,7 @@ class _FilterBarState extends State<FilterBar> {
         });
       }
     });
-  }
+  }*/
 
 }
 
@@ -261,6 +313,7 @@ class PostCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+
             if (post.title.isNotEmpty)
               Text('Title: ${post.title}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             if (post.selectedLocation != null)

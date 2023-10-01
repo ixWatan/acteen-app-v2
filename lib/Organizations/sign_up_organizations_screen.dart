@@ -1,26 +1,26 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:test/home_page_activists.dart';
 // ignore: depend_on_referenced_packages
-import 'log_in_screen.dart';
+import '../log_in_screen.dart';
 // ignore: depend_on_referenced_packages
 import 'package:firebase_auth/firebase_auth.dart';
+import 'home_page_organizations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class SignUpPageOrganizations extends StatefulWidget {
+class SignUpPageActivists extends StatefulWidget {
   //SignUpPage is a class that extends StatefulWidget, indicating that this widget maintains a mutable state.
 
-  const SignUpPageOrganizations({super.key});
+  const SignUpPageActivists({super.key});
   //It accepts a key as a parameter in its constructor, which is passed to the superclass constructor.
 
   @override
   // ignore: library_private_types_in_public_api
   _SignUpPageState createState() => _SignUpPageState();
-  //The createState method is overridden to return an instance of _SignUpPageState, which contains the mutable state for this widget.
+//The createState method is overridden to return an instance of _SignUpPageState, which contains the mutable state for this widget.
 }
 
-class _SignUpPageState extends State<SignUpPageOrganizations> {
+class _SignUpPageState extends State<SignUpPageActivists> {
   //_SignUpPageState is a private class that holds the state for the SignUpPage widget.
 
   final _auth = FirebaseAuth.instance;
@@ -29,9 +29,8 @@ class _SignUpPageState extends State<SignUpPageOrganizations> {
   //It defines three instance variables: _auth (an instance of FirebaseAuth),
   //_emailController, and _passwordController (both are instances of TextEditingController to control the text fields for email and password inputs).
 
-  Future<void> _signUp() async {
-    //You're declaring a method named _signUp that is asynchronous (meaning it can perform operations that might take some time to complete,
-    //like network requests) and returns a Future that resolves to void (i.e., it doesn't return a value).
+  Future<void> _signUp() async {//You're declaring a method named _signUp that is asynchronous (meaning it can perform operations that might take some time to complete,
+    // like network requests) and returns a Future that resolves to void (i.e., it doesn't return a value).
 
     try {//A try block is initiated. The code inside this block is executed, and if any error occurs, it jumps to the catch blocks to handle the error.
       UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
@@ -45,7 +44,7 @@ class _SignUpPageState extends State<SignUpPageOrganizations> {
       //You're retrieving the unique ID (uid) of the newly created user from the userCredential object and storing it in the userId variable.
 
       // Add user details to Firestore
-      CollectionReference users = FirebaseFirestore.instance.collection('activists');
+      CollectionReference users = FirebaseFirestore.instance.collection('organizations');
       users.doc(userId).set({
         'uid': userId,
         'email': _emailController.text.trim(),
@@ -55,7 +54,7 @@ class _SignUpPageState extends State<SignUpPageOrganizations> {
 
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const HomePageActivists()),
+        MaterialPageRoute(builder: (context) => const HomePageOrganizations()),
       );
       //After successfully creating the user and saving the details to Firestore, you're navigating to the HomePageActivists screen using Navigator.push.
 
@@ -74,11 +73,10 @@ class _SignUpPageState extends State<SignUpPageOrganizations> {
         ),
       );
     }
-    //If any error occurs during the execution of the code inside the try block, these catch blocks will handle them.
-    //The first catch block handles errors of type FirebaseAuthException, displaying a snackbar with the error message. The second catch block handles any other types of errors, displaying a snackbar with a generic error message.
+    //If any error occurs during the execution of the code inside the try block,
+    //these catch blocks will handle them. The first catch block handles errors of type FirebaseAuthException, displaying a snackbar with the error message.
+    //The second catch block handles any other types of errors, displaying a snackbar with a generic error message.
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -134,7 +132,4 @@ class _SignUpPageState extends State<SignUpPageOrganizations> {
     );
   }
 }//This marks the end of the _signUp method.
-
-
-
 

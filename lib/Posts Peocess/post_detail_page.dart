@@ -1,8 +1,7 @@
 // ignore_for_file: depend_on_referenced_packages
 
 import 'package:flutter/material.dart';
-import 'package:test/post.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:test/Posts%20Peocess/post.dart';
 import 'package:add_2_calendar/add_2_calendar.dart';
 
 class PostDetailPage extends StatelessWidget {
@@ -31,13 +30,9 @@ class PostDetailPage extends StatelessWidget {
       location: post.selectedLocation ?? '',
       startDate: startDateTime!,
       endDate: endDateTime!,
-        iosParams: const IOSParams(reminder: Duration(minutes: 30)),
-        androidParams: const AndroidParams(emailInvites: [])
     );
 
-    Add2Calendar.addEvent2Cal(event).then((value) {
-
-    });
+    Add2Calendar.addEvent2Cal(event);
   }
 
 
@@ -66,6 +61,7 @@ class PostDetailPage extends StatelessWidget {
                   Text('Location: ${post.selectedLocation}'),
                 if (post.startDate != null)
                   Text('Start Date: ${post.startDate!.toLocal().toString().split(' ')[0]}'),
+
                 if (post.startTime != null)
                   Text('Start Time: ${post.startTime!.format(context)}'),
                 if (post.endDate != null)
@@ -86,7 +82,6 @@ class PostDetailPage extends StatelessWidget {
                 child: const Text('Add To Calender'
                 )
             ),
-
           ],
         ),
       ),

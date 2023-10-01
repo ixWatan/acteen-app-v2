@@ -3,7 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'firebase_options.dart';
 import 'log_in_screen.dart';
-import 'home_page_organizations.dart';
+import 'Organizations/home_page_organizations.dart';
 // ignore: depend_on_referenced_packages
 import 'package:firebase_auth/firebase_auth.dart';
 

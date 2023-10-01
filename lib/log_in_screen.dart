@@ -2,10 +2,10 @@
 import 'package:flutter/material.dart';
 // ignore: depend_on_referenced_packages
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:test/sign_up_organizations_screen.dart';
-import 'home_page_organizations.dart';
-import 'home_page_activists.dart';
-import 'sign_up_activists_screen.dart';
+import 'package:test/Organizations/sign_up_organizations_screen.dart';
+import 'Organizations/home_page_organizations.dart';
+import 'Activists/home_page_activists.dart';
+import 'Activists/sign_up_activists_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() {
