@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:test/post.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:add_2_calendar/add_2_calendar.dart';
 
 class PostDetailPage extends StatelessWidget {
@@ -30,9 +31,13 @@ class PostDetailPage extends StatelessWidget {
       location: post.selectedLocation ?? '',
       startDate: startDateTime!,
       endDate: endDateTime!,
+        iosParams: const IOSParams(reminder: Duration(minutes: 30)),
+        androidParams: const AndroidParams(emailInvites: [])
     );
 
-    Add2Calendar.addEvent2Cal(event);
+    Add2Calendar.addEvent2Cal(event).then((value) {
+
+    });
   }
 
 
@@ -81,6 +86,7 @@ class PostDetailPage extends StatelessWidget {
                 child: const Text('Add To Calender'
                 )
             ),
+
           ],
         ),
       ),
