@@ -9,7 +9,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 void main() async {
   //This is the entry point of your Flutter application.
-  // The main function is where the execution of your app starts.
+  // The main  is where the execution of your app starts.
   // The async keyword indicates that this function can perform operations asynchronously,
   // meaning it can perform tasks in the background and doesn't block the main thread.
 
@@ -86,8 +86,8 @@ class MyHomePage extends StatefulWidget {
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
-  //This method overrides the createState method from the StatefulWidget class.
-  //It returns a new instance of _MyHomePageState, which holds the mutable state for MyHomePage.
+//This method overrides the createState method from the StatefulWidget class.
+//It returns a new instance of _MyHomePageState, which holds the mutable state for MyHomePage.
 }
 
 class _MyHomePageState extends State<MyHomePage> {
@@ -182,7 +182,7 @@ class OnboardingScreen extends StatefulWidget {
   //It can hold data that might change during the lifetime of the widget.
 
   const OnboardingScreen({super.key});
- //This is the constructor for the OnboardingScreen class.
+  //This is the constructor for the OnboardingScreen class.
   // It accepts an optional key parameter which is passed to the superclass (StatefulWidget) using super.key.
   // The const keyword indicates that this constructor can be invoked at compile-time to create a compile-time constant.
 
@@ -191,9 +191,9 @@ class OnboardingScreen extends StatefulWidget {
 
   // ignore: library_private_types_in_public_api
   _OnboardingScreenState createState() => _OnboardingScreenState();
-  //This method overrides the createState method from the StatefulWidget class.
-  //It returns a new instance of _OnboardingScreenState, which holds the mutable state for this widget.
-  //The createState method is called by the framework when it inflates this widget and needs to create the mutable state object.
+//This method overrides the createState method from the StatefulWidget class.
+//It returns a new instance of _OnboardingScreenState, which holds the mutable state for this widget.
+//The createState method is called by the framework when it inflates this widget and needs to create the mutable state object.
 
 }
 
@@ -376,4 +376,3 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 }
 //----------------------------------------------------------------------------------------
-
