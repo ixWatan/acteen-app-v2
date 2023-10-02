@@ -1,5 +1,4 @@
 // ignore_for_file: depend_on_referenced_packages, no_leading_underscores_for_local_identifiers
-import 'dart:math' as math;
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
