@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class Post {
+  double? latitude;
+  double? longitude;
   final String userId;
   final String title;
   final String description;
@@ -13,6 +15,8 @@ class Post {
   String? imagePath;
 
   Post({
+    this.latitude,
+    this.longitude,
     required this.userId,
     required this.title,
     required this.selectedHashtags,
@@ -37,6 +41,8 @@ class Post {
       endDate: json['endDate'] != null ? DateTime.parse(json['endDate']) : null,
       endTime: json['endTime'] != null ? TimeOfDay.fromDateTime(DateTime.parse('1970-01-01 ${json['endTime']}')) : null,
       imagePath: json['imagePath'],
+      latitude: json['latitude'] as double?,
+      longitude: json['longitude'] as double?,
     );
   }
 

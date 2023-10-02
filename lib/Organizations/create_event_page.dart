@@ -34,7 +34,7 @@ String? selectedLocation;
 
 class _CreateEventPageState extends State<CreateEventPage> {
   final TextEditingController _locationController = TextEditingController();
-  List<String> _locationSuggestions = [];
+  List<Map<String, dynamic>> _locationSuggestions = [];
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   XFile? _selectedImage;
@@ -42,6 +42,8 @@ class _CreateEventPageState extends State<CreateEventPage> {
   TimeOfDay? _startTime;
   DateTime? _endDate;
   TimeOfDay? _endTime;
+  double? _selectedLat;
+  double? _selectedLng;
 
   final ImagePicker _picker = ImagePicker();
 
@@ -131,6 +133,9 @@ class _CreateEventPageState extends State<CreateEventPage> {
           'endTime': _endTime?.format(context),
           'hashtags': _selectedHashtags,
           'userId': userId, // Now getting the actual user ID
+          'latitude': _selectedLat,
+          'longitude': _selectedLng,
+
         });
       }
     } catch (e) {
@@ -156,15 +161,18 @@ class _CreateEventPageState extends State<CreateEventPage> {
       });
 
       final response = await http.get(endpoint);
+      final Map<String, dynamic> data = json.decode(response.body);
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (data['predictions'] != null) {
-          final List<String> suggestions = List<String>.from(data['predictions'].map((prediction) => prediction['description']));
-          setState(() {
-            _locationSuggestions = suggestions;
-          });
-        }
+      if (data['predictions'] != null) {
+        final List<Map<String, dynamic>> suggestions = List<Map<String, dynamic>>.from(
+            data['predictions'].map((prediction) => {
+              'description': prediction['description'],
+              'place_id': prediction['place_id']
+            })
+        );
+        setState(() {
+          _locationSuggestions = suggestions;
+        });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -182,6 +190,31 @@ class _CreateEventPageState extends State<CreateEventPage> {
       );
     }
   }
+
+//function to get the lat and long based on a selected place_id:
+  Future<Map<String, double>> _getPlaceDetails(String placeId) async {
+    final String apiKey = getApiKey(context);
+    final endpoint = Uri.https('maps.googleapis.com', '/maps/api/place/details/json', {
+      'place_id': placeId,
+      'fields': 'geometry',
+      'key': apiKey,
+    });
+
+    final response = await http.get(endpoint);
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = json.decode(response.body);
+      if (data['result'] != null && data['result']['geometry'] != null) {
+        final location = data['result']['geometry']['location'];
+        return {
+          'lat': location['lat'],
+          'lng': location['lng'],
+        };
+      }
+    }
+    throw Exception('Failed to fetch place details');
+  }
+
 
 
   //This part defines the build method which constructs the UI of the CreateEventPage. It contains a lot of widgets such as TextField, ElevatedButton, Image.file, DatePicker, TimePicker, and a ListView to arrange these widgets in a scrollable list.
@@ -300,12 +333,8 @@ class _CreateEventPageState extends State<CreateEventPage> {
                       IconButton(
                         icon: const Icon(Icons.clear),
                         onPressed: () {
-                          _titleController.clear();
-                          setState(() {
-                            // _titleController.clear(); // This is not needed.
-                          });
+                          _locationController.clear();
                         },
-
                       ),
                     ],
                   ),
@@ -326,14 +355,18 @@ class _CreateEventPageState extends State<CreateEventPage> {
                   child: Column(
                     children: _locationSuggestions.map((location) {
                       return ListTile(
-                        title: Text(location),
-                        onTap: () {
+                        title: Text(location['description']),
+                        onTap: () async {
+                          final coordinates = await _getPlaceDetails(location['place_id']);
                           setState(() {
-                            _locationController.text = location;
-                            selectedLocation = location;
+                            _locationController.text = location['description'];
+                            selectedLocation = location['description'];
+                            _selectedLat = coordinates['lat'];
+                            _selectedLng = coordinates['lng'];
                             _locationSuggestions.clear(); // Clear suggestions
                           });
                         },
+
 
                       );
                     }).toList(),

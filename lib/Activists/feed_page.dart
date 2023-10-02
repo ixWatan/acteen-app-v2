@@ -1,9 +1,12 @@
-// ignore_for_file: depend_on_referenced_packages, library_private_types_in_public_api
+// ignore_for_file: depend_on_referenced_packages, library_private_types_in_public_api, use_build_context_synchronously, must_be_immutable
 import 'package:flutter/material.dart';
-import 'package:test/Posts%20Peocess/post_detail_page.dart';
-import '../Posts Peocess/filter_c.dart';
-import '../Posts Peocess/post.dart';
-import '../Posts Peocess/post_service.dart';
+import 'package:test/Posts%20Process/post_detail_page.dart';
+import '../Posts Process/filter_c.dart';
+import '../Posts Process/post.dart';
+import '../Posts Process/post_service.dart';
+import '../config.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class FeedPage extends StatefulWidget {
   const FeedPage({Key? key}) : super(key: key);
@@ -17,13 +20,19 @@ class _FeedPageState extends State<FeedPage> {
   FilterC _currentFilter = FilterC();
 
 
-
   void _onFilterChanged(FilterC newFilter) {
     setState(() {
       _currentFilter = newFilter;
     });
 
   }
+
+  Future<void> _handleRefresh() async {
+    // Trigger a state rebuild to refresh the posts
+    setState(() {});
+
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -49,22 +58,25 @@ class _FeedPageState extends State<FeedPage> {
                   return const Center(child: Text('No posts available.'));
                 } else {
                   final List<Post> posts = snapshot.data!;
-                  return ListView.builder(
-                    itemCount: posts.length,
-                    itemBuilder: (context, index) {
-                      final post = posts[index];
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => PostDetailPage(post: post),
-                            ),
-                          );
-                        },
-                        child: PostCard(post: post),
-                      );
-                    },
+                  return RefreshIndicator(
+                    onRefresh: _handleRefresh,
+                    child: ListView.builder(
+                      itemCount: posts.length,
+                      itemBuilder: (context, index) {
+                        final post = posts[index];
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => PostDetailPage(post: post),
+                              ),
+                            );
+                          },
+                          child: PostCard(post: post),
+                        );
+                      },
+                    ),
                   );
                 }
               },
@@ -78,14 +90,18 @@ class _FeedPageState extends State<FeedPage> {
 
 class FilterBar extends StatefulWidget {
   final ValueChanged<FilterC> onFilterChanged;
-  final FilterC currentFilter;  // defining currentFilter
-  const FilterBar({Key? key, required this.onFilterChanged, required this.currentFilter}) : super(key: key);
+  FilterC currentFilter;  // Removed 'final'
+
+  FilterBar({Key? key, required this.onFilterChanged, required this.currentFilter}) : super(key: key);
 
   @override
   _FilterBarState createState() => _FilterBarState();
 }
 
+
 class _FilterBarState extends State<FilterBar> {
+  double? latitude;
+  double? longitude;
   String? selectedLocation;
   List<String>? selectedHashtags;
   DateTime? startDate;
@@ -122,7 +138,8 @@ class _FilterBarState extends State<FilterBar> {
             String label;
             dynamic value = tag.values.first;
             if (value is DateTime) {
-              label = value.toLocal().toIso8601String().split("T")[0]; // Keep only the date part
+              label = value.toLocal().toIso8601String().split(
+                  "T")[0]; // Keep only the date part
             } else if (value is TimeOfDay) {
               label = value.format(context); // Format TimeOfDay
             } else {
@@ -144,49 +161,9 @@ class _FilterBarState extends State<FilterBar> {
 
       ],
     );
-
   }
 
-  void _showLocationFilterDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return Dialog(
-          child: Column(
-            children: [
-              // Populate with your list of locations
-              ListTile(
-                title: const Text('Location 1'),
-                onTap: () {
-                  setState(() {
-                    widget.currentFilter.location = 'Location 1';
-                    widget.currentFilter.addTag('location', widget.currentFilter.location);
-                  });
-                  widget.onFilterChanged(widget.currentFilter); // Pass the updated currentFilter instance to the callback
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: const Text('Location 2'),
-                onTap: () {
-                  setState(() {
-                    setState(() {
-                      widget.currentFilter.location = 'Location 2';
-                      widget.currentFilter.addTag('location', widget.currentFilter.location);
-                    });
-                  });
-                  widget.onFilterChanged(widget.currentFilter); // Pass the updated currentFilter instance to the callback
-                  Navigator.pop(context);
-                },
 
-              ),
-              // Add more locations as needed
-            ],
-          ),
-        );
-      },
-    );
-  }
 
 
 
@@ -213,6 +190,39 @@ class _FilterBarState extends State<FilterBar> {
                 onTap: () {
                   setState(() {
                     widget.currentFilter.hashtag = 'Hashtag2';
+                    widget.currentFilter.addTag('hashtag', widget.currentFilter.hashtag);
+                  });
+                  widget.onFilterChanged(widget.currentFilter);
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                title: const Text('Hashtag3'),
+                onTap: () {
+                  setState(() {
+                    widget.currentFilter.hashtag = 'Hashtag3';
+                    widget.currentFilter.addTag('hashtag', widget.currentFilter.hashtag);
+                  });
+                  widget.onFilterChanged(widget.currentFilter);
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                title: const Text('Hashtag4'),
+                onTap: () {
+                  setState(() {
+                    widget.currentFilter.hashtag = 'Hashtag4';
+                    widget.currentFilter.addTag('hashtag', widget.currentFilter.hashtag);
+                  });
+                  widget.onFilterChanged(widget.currentFilter);
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                title: const Text('Hashtag5'),
+                onTap: () {
+                  setState(() {
+                    widget.currentFilter.hashtag = 'Hashtag5';
                     widget.currentFilter.addTag('hashtag', widget.currentFilter.hashtag);
                   });
                   widget.onFilterChanged(widget.currentFilter);
@@ -265,36 +275,168 @@ class _FilterBarState extends State<FilterBar> {
   }
 
 
-/*  void _showTimeFilterDialog() {
+  void _showLocationFilterDialog() async {
+    final List<Map<String, dynamic>> districts = await fetchDistricts();
 
-    showDatePicker(
+    final FilterC? updatedFilter = await showDialog<FilterC>(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
-    ).then((date) {
-      if (date != null) {
-        showTimePicker(
-          context: context,
-          initialTime: TimeOfDay.now(),
-        ).then((time) {
-          if (time != null) {
-            setState(() {
-              widget.currentFilter.startDate = date;
-              widget.currentFilter.startTime = time;
+      builder: (context) {
+        return LocationDialog(
+          initialFilter: widget.currentFilter,
+          districts: districts,
+          getPlaceDetails: _getPlaceDetails,
+        );
 
-              // Adding tags for the selected date and time
-              widget.currentFilter.addTag('startDate', date);
-              widget.currentFilter.addTag('startTime', time.format(context));
-            });
-            widget.onFilterChanged(widget.currentFilter); // Pass the updated currentFilter instance to the callback
-          }
-        });
+      },
+    );
+
+    if (updatedFilter != null) {
+      setState(() {
+        widget.currentFilter = updatedFilter;
+      });
+      widget.onFilterChanged(widget.currentFilter);
+    }
+  }
+
+
+
+
+
+
+
+
+  Future<List<Map<String, dynamic>>> fetchDistricts() async {
+    try {
+      final String apiKey = getApiKey(context);
+      final endpoint = Uri.https('maps.googleapis.com', '/maps/api/place/autocomplete/json', {
+        'input': 'מחוז',
+        'types': 'geocode', // optional: to get more specific results
+        'components': 'country:IL', // Restrict results to Israel
+        'language': 'iw', // Request results in Hebrew
+
+        'key': apiKey,
+      });
+
+
+      final response = await http.get(endpoint);
+      final data = json.decode(response.body);
+
+      if (data['predictions'] != null) {
+        return List<Map<String, dynamic>>.from(
+          data['predictions'].map((prediction) => {
+            'description': prediction['description'],
+            'place_id': prediction['place_id'],
+          }),
+        );
+      } else {
+        throw Exception('Failed to fetch districts');
       }
+    } catch (error) {
+      rethrow;
+    }
+  }
+
+
+
+  //function to get the lat and long based on a selected place_id:
+  Future<Map<String, double>> _getPlaceDetails(String placeId) async {
+    final String apiKey = getApiKey(context);
+    final endpoint = Uri.https('maps.googleapis.com', '/maps/api/place/details/json', {
+      'place_id': placeId,
+      'fields': 'geometry',
+      'key': apiKey,
     });
-  }*/
+
+    final response = await http.get(endpoint);
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = json.decode(response.body);
+      if (data['result'] != null && data['result']['geometry'] != null) {
+        final location = data['result']['geometry']['location'];
+        return {
+          'lat': location['lat'],
+          'lng': location['lng'],
+        };
+      }
+    }
+    throw Exception('Failed to fetch place details');
+  }
 
 }
+
+
+class LocationDialog extends StatefulWidget {
+  final FilterC initialFilter;
+  final List<Map<String, dynamic>> districts;
+  final Future<Map<String, double>> Function(String placeId) getPlaceDetails;
+
+  const LocationDialog({super.key,
+    required this.initialFilter,
+    required this.districts,
+    required this.getPlaceDetails,
+  });
+
+  @override
+  _LocationDialogState createState() => _LocationDialogState();
+}
+
+
+class _LocationDialogState extends State<LocationDialog> {
+  late FilterC _currentFilter;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentFilter = widget.initialFilter; // make a copy to avoid direct modification
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Slider for adjusting the radius
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: [
+                Slider(
+                  value: _currentFilter.radius,
+                  onChanged: (double newValue) {
+                    setState(() {
+                      _currentFilter.radius = newValue;
+                    });
+                  },
+                  min: 5.0,
+                  max: 200.0,
+                  divisions: 10,
+                  label: _currentFilter.radius.round().toString(),
+                ),
+                Text("Radius: ${_currentFilter.radius.round()} km"),
+              ],
+            ),
+          ),
+          // List of districts
+          ...widget.districts.map((district) {
+            return ListTile(
+              title: Text(district['description']),
+              onTap: () async {
+                final coordinates = await widget.getPlaceDetails(district['place_id']);
+                _currentFilter.location = district['description'];
+                _currentFilter.latitude = coordinates['lat'];
+                _currentFilter.longitude = coordinates['lng'];
+                _currentFilter.addTag('location', _currentFilter.location);
+                Navigator.pop(context, _currentFilter); // return updated filter
+              },
+            );
+          }).toList(),
+        ],
+      ),
+    );
+  }
+}
+
 
 
 class PostCard extends StatelessWidget {

@@ -1,7 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
-
 import 'package:flutter/material.dart';
-import 'package:test/Activists/home_page_activists.dart';
+import 'package:test/Activists/interests_page.dart';
 // ignore: depend_on_referenced_packages
 import '../log_in_screen.dart';
 // ignore: depend_on_referenced_packages
@@ -55,7 +54,7 @@ class _SignUpPageState extends State<SignUpPageOrganizations> {
 
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const HomePageActivists()),
+        MaterialPageRoute(builder: (context) => const InterestsPage()),
       );
       //After successfully creating the user and saving the details to Firestore, you're navigating to the HomePageActivists screen using Navigator.push.
 
