@@ -4,39 +4,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'filter_c.dart';
 import 'post.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class PostService {
-
-
 
   Future<List<Post>> fetchPosts(FilterC filter) async {
     List<Post> posts = [];
 
-    Future<Map<String, int>> _fetchUserInterests() async {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        return {};
-      }
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('activists').doc(user.uid).get();
-      Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
-      return Map<String, int>.from(userData['interests'] ?? {});
-    }
 
+    // Fetch all posts from the main_events collection
+    QuerySnapshot eventsSnapshot = await FirebaseFirestore.instance.collection('main_events').get();
 
-
-
-    // Fetch user's interests
-    Map<String, int> userInterests = await _fetchUserInterests();
-
-    // Step 1: Fetch all organizations
-    QuerySnapshot organizationsSnapshot = await FirebaseFirestore.instance.collection('organizations').get();
-
-    // Step 2: For each organization, fetch all events and add them to the posts list
-    for (QueryDocumentSnapshot organizationDocument in organizationsSnapshot.docs) {
-      QuerySnapshot eventsSnapshot = await organizationDocument.reference.collection('events').get();
-      posts.addAll(eventsSnapshot.docs.map((eventDoc) => Post.fromJson(eventDoc.data() as Map<String, dynamic>)).toList());
-    }
+    // Convert the documents to Post objects and add them to the posts list
+    posts.addAll(eventsSnapshot.docs.map((eventDoc) => Post.fromJson(eventDoc.data() as Map<String, dynamic>)).toList());
 
     bool isTimeOfDayBefore(TimeOfDay timeToCheck, TimeOfDay referenceTime) {
       return timeToCheck.hour < referenceTime.hour ||
@@ -105,23 +84,17 @@ class PostService {
     }
 
 
-    // Sort by combined criteria: importance of hashtags and number of matching hashtags
+    // Sort by points and then by closeness to the current date
     posts.sort((a, b) {
-      // Primary sorting criterion:
-      int scoreA = a.selectedHashtags.where((tag) => userInterests.containsKey(tag)).fold(0, (prev, tag) => prev + userInterests[tag]!);
-      int scoreB = b.selectedHashtags.where((tag) => userInterests.containsKey(tag)).fold(0, (prev, tag) => prev + userInterests[tag]!);
-      int primarySort = scoreB.compareTo(scoreA);
+      int compare = b.points.compareTo(a.points); // Primary sorting by points
 
-      if (primarySort != 0) {
-        return primarySort;
-      } else {
-        // Secondary sorting criterion:
-        int countA = a.selectedHashtags.where((tag) => userInterests.containsKey(tag)).length;
-        int countB = b.selectedHashtags.where((tag) => userInterests.containsKey(tag)).length;
-        return countB.compareTo(countA);
+      if (compare == 0 && a.startDate != null && b.startDate != null) {
+        // Secondary sorting by closeness to the current date when points are equal
+        return a.startDate!.difference(DateTime.now()).compareTo(b.startDate!.difference(DateTime.now()));
       }
-    });
 
+      return compare;
+    });
 
     return posts;
   }

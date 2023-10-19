@@ -8,6 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../config.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+
 //These lines import the necessary packages and libraries. For instance, it imports Flutter's material design library,
 //an HTTP client library (http), JSON decoding support, file I/O functionalities, and various Firebase packages.
 
@@ -33,6 +34,7 @@ String? selectedLocation;
 // _picker: An instance of ImagePicker to facilitate image picking from the gallery.
 
 class _CreateEventPageState extends State<CreateEventPage> {
+
   final TextEditingController _locationController = TextEditingController();
   List<Map<String, dynamic>> _locationSuggestions = [];
   final TextEditingController _titleController = TextEditingController();
@@ -102,7 +104,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
       });
   }
 
-  Future<void> addEventToDatabase() async {//addEventToDatabase: Responsible for uploading event details (including an uploaded image's URL) to Firebase Cloud Firestore.
+  Future<String?> addEventToDatabase() async {
     try {
       String? imageUrl;
       if (_selectedImage != null) {
@@ -118,25 +120,55 @@ class _CreateEventPageState extends State<CreateEventPage> {
       final userId = FirebaseAuth.instance.currentUser?.uid;
 
       if (userId != null) {
-        await FirebaseFirestore.instance
-            .collection('organizations')
-            .doc(userId)
-            .collection('events')
-            .add({
+        Map<String, dynamic> eventData = {
           'title': _titleController.text,
           'description': _descriptionController.text,
-          'imagePath': imageUrl, // Now storing the URL of the uploaded image instead of the local path
+          'imagePath': imageUrl,
           'location': selectedLocation,
           'startDate': _startDate?.toIso8601String(),
           'startTime': _startTime?.format(context),
           'endDate': _endDate?.toIso8601String(),
           'endTime': _endTime?.format(context),
-          'hashtags': _selectedHashtags,
-          'userId': userId, // Now getting the actual user ID
+          'hashtags': _selectedHashtags.toList(),
+          'userId': userId,
           'latitude': _selectedLat,
           'longitude': _selectedLng,
+          'likesCount': 0, // initializing with 0
+          'likedByUserIds': [], // initializing with an empty list
+          'attendeesCount': 0, // initializing with 0
+          'attendedByUserIds': [], // initializing with an empty list
+        };
 
-        });
+
+        DocumentReference docRef = await FirebaseFirestore.instance
+            .collection('organizations')
+            .doc(userId)
+            .collection('events')
+            .add(eventData);
+
+        // Update the event data with the generated postId
+        eventData['postId'] = docRef.id;
+
+        // Update the document in the user's organization's events collection with the postId
+        await FirebaseFirestore.instance
+            .collection('organizations')
+            .doc(userId)
+            .collection('events')
+            .doc(docRef.id)
+            .update({'postId': docRef.id});
+
+        // Additionally adding event to the main_events collection
+        // You should also update the main_events collection's document with the postId
+        DocumentReference mainEventDocRef = await FirebaseFirestore.instance
+            .collection('main_events')
+            .add(eventData);
+
+        await FirebaseFirestore.instance
+            .collection('main_events')
+            .doc(mainEventDocRef.id)
+            .update({'postId': mainEventDocRef.id});
+
+        return docRef.id; // Returning the event ID
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -145,8 +177,12 @@ class _CreateEventPageState extends State<CreateEventPage> {
           backgroundColor: Colors.red,
         ),
       );
+      return null; // Return null if there is an exception
     }
+    return null;
   }
+
+
 
 
 

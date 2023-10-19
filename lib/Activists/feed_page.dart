@@ -7,17 +7,47 @@ import '../Posts Process/post_service.dart';
 import '../config.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
+
+Future<String?> getUserId() async {
+  return FirebaseAuth.instance.currentUser?.uid;
+}
 
 class FeedPage extends StatefulWidget {
   const FeedPage({Key? key}) : super(key: key);
 
   @override
   _FeedPageState createState() => _FeedPageState();
+
 }
 
+
+
 class _FeedPageState extends State<FeedPage> {
+
+  @override
+  void initState() {
+    super.initState();
+    _initialize();
+  }
+
+  Future<void> _initialize() async {
+    //call the update_posts_points function
+    User? currentUser = FirebaseAuth.instance.currentUser; // Get the current user
+
+    if (currentUser != null) { // Check if a user is currently signed in
+      String userId = currentUser.uid; // Get the user ID
+      await callCloudFunction(userId, context);// Call the cloud function with the user ID
+    } else {
+      // Handle the case where no user is signed in if necessary
+    }
+  }
+
+
+
   final PostService postService = PostService();
   FilterC _currentFilter = FilterC();
+
 
 
   void _onFilterChanged(FilterC newFilter) {
@@ -27,7 +57,43 @@ class _FeedPageState extends State<FeedPage> {
 
   }
 
+  Future<void> callCloudFunction(String userId, BuildContext context) async {
+    const functionUrl = "https://us-central1-acteen--flutter-app.cloudfunctions.net/update_post_points";
+
+    final response = await http.post(
+      Uri.parse(functionUrl),
+      headers: {"Content-Type": "application/json"}, // Set the Content-Type to application/json
+      body: jsonEncode({'userId': userId}), // Convert the body to a JSON string
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          response.statusCode == 200 ? 'Function called successfully.' : 'Failed to call the function.',
+        ),
+        duration: const Duration(seconds: 3), // Adjust the duration as needed
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      // You might want to do something with the response here
+    } else {
+      // You might want to handle the error here
+    }
+  }
+
+
   Future<void> _handleRefresh() async {
+    //call the update_posts_points function
+    User? currentUser = FirebaseAuth.instance.currentUser; // Get the current user
+
+    if (currentUser != null) { // Check if a user is currently signed in
+      String userId = currentUser.uid; // Get the user ID
+      await callCloudFunction(userId, context);// Call the cloud function with the user ID
+    } else {
+      // Handle the case where no user is signed in if necessary
+    }
+
     // Trigger a state rebuild to refresh the posts
     setState(() {});
 
