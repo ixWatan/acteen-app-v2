@@ -134,6 +134,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
                       post.likedByUserIds.contains(currentUserId)
                           ? Icons.favorite
                           : Icons.favorite_border,
+                      color: post.likedByUserIds.contains(currentUserId) ? Colors.red: null,
                     ),
                     onPressed: () => handleLikeButtonPress(currentUserId),
                   ),
